@@ -243,8 +243,7 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
   };
   // Indian webcams listed on worldcam.eu (live-view page = same number as the webcam page)
   function wc(name, slug, ch){
-    var id = slug.split('-')[0];
-    return {name: name, url: 'https://worldcam.eu/liveview/' + id, page: 'https://worldcam.eu/webcams/asia/india/' + slug, ch: ch || 'WorldCam India webcam', type: 'frame'};
+    return {name: 'WorldCam: ' + name, url: 'https://worldcam.eu/webcams/asia/india/' + slug};
   }
   var NEWDELHI = wc('New Delhi - Panoramic city view (Parikrama revolving restaurant)', '31023-new-delhi-panoramic-view', 'WorldCam / AQI.in');
   var ISKCONDELHI = wc('Delhi - Sri Sri Radha Parthasarathi Mandir (ISKCON Delhi)', '5447-delhi-sri-sri-radha-parthasarathi-mandir', 'WorldCam / ISKCON Delhi');
@@ -274,9 +273,6 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
       wc('Kerala - Kannur (house yard & street, live)', '21794-kerala-kannur', 'WorldCam India webcam'),
       {name: 'Kerala - Kannur live video (YouTube)', vid: 'W_xwEtwgqP4', ch: 'YouTube live listed on WorldCam', type: 'ytlive'}]
   };
-  Object.keys(WCAMS).forEach(function(k){
-    CITY_DIRECT_CAMS[k] = (CITY_DIRECT_CAMS[k] || []).concat(WCAMS[k]);
-  });
 
   var INDIA_LINKS = [
     {name:"WebcamTaxi - India", url:"https://www.webcamtaxi.com/en/india.html"},
@@ -290,6 +286,13 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
     "Bengaluru": [{name:"Bengaluru Traffic Police", url:"https://btp.gov.in"}],
     "Hyderabad": [{name:"Hyderabad Traffic Police", url:"https://www.hyderabadpolice.gov.in"}]
   };
+  // Real YouTube streams play inside the page; WorldCam/provider pages are links (they refuse to be embedded)
+  Object.keys(WCAMS).forEach(function(k){
+    WCAMS[k].forEach(function(c){
+      if (c.vid) CITY_DIRECT_CAMS[k] = (CITY_DIRECT_CAMS[k] || []).concat([c]);
+      else CITY_LINKS[k] = (CITY_LINKS[k] || []).concat([c]);
+    });
+  });
 
   var SPACE_TERMS = {
     "Earth from Space": "Earth from space live ISS camera",
@@ -524,7 +527,7 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
       document.getElementById('plWrap').style.display = 'none';
       var n = document.createElement('div');
       n.className = 'note';
-      n.textContent = 'No live stream for ' + cityName + ' was found right now. The free search servers can be busy: try again in a minute. You can also use the source sites below.';
+      n.textContent = 'No live stream that plays inside this page was found for ' + cityName + ' right now. Try again in a minute (the free search servers can be busy), or open the camera pages below.';
       camsEl.appendChild(n);
     }
 
@@ -534,7 +537,7 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
       var h = document.createElement('div');
       h.className = 'note';
       h.style.marginTop = '10px';
-      h.textContent = 'More Indian camera sources (open in a new tab):';
+      h.textContent = 'Camera pages for this place (open in a new tab - these sites cannot be shown inside this page):';
       camsEl.appendChild(h);
       links.forEach(function(l){
         var r = document.createElement('div');
