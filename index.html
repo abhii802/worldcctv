@@ -193,28 +193,102 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
     ]
   };
 
+  // Only Indian locations that have well-known public live streams (temples, ghats, city/traffic cameras).
   var INDIA = {
-    "Andhra Pradesh":["Tirupati","Visakhapatnam","Vijayawada","Guntur"],
-    "Assam":["Guwahati","Dibrugarh","Silchar"],
-    "Bihar":["Patna","Bodh Gaya","Gaya"],
-    "Delhi":["New Delhi","Connaught Place","Old Delhi"],
-    "Goa":["Panaji","Calangute","Baga","Margao"],
-    "Gujarat":["Somnath","Dwarka","Ahmedabad","Surat"],
-    "Haryana":["Gurugram","Kurukshetra","Ambala","Faridabad"],
-    "Himachal Pradesh":["Shimla","Manali","Dharamshala","Kullu"],
-    "Jammu & Kashmir":["Katra","Srinagar","Gulmarg","Pahalgam"],
-    "Karnataka":["Bengaluru","Mysuru","Udupi","Mangaluru"],
-    "Kerala":["Kochi","Thiruvananthapuram","Munnar","Sabarimala"],
-    "Madhya Pradesh":["Ujjain","Omkareshwar","Indore","Bhopal"],
-    "Maharashtra":["Mumbai","Shirdi","Pune","Nagpur","Nashik"],
-    "Odisha":["Puri","Bhubaneswar","Konark"],
-    "Punjab":["Amritsar","Ludhiana","Chandigarh","Jalandhar"],
-    "Rajasthan":["Jaipur","Udaipur","Pushkar","Jodhpur","Jaisalmer"],
-    "Tamil Nadu":["Chennai","Madurai","Rameswaram","Ooty","Kanyakumari"],
-    "Telangana":["Hyderabad","Warangal"],
-    "Uttar Pradesh":["Varanasi","Ayodhya","Vrindavan","Mathura","Prayagraj","Agra"],
-    "Uttarakhand":["Haridwar","Rishikesh","Nainital","Kedarnath","Badrinath"],
-    "West Bengal":["Kolkata","Darjeeling","Siliguri","Digha"]
+    "Andhra Pradesh": ["Tirupati"],
+    "Bihar": ["Muzaffarpur"],
+    "Delhi": ["Paharganj","Connaught Place","New Delhi"],
+    "Gujarat": ["Ahmedabad","Bhuj","Dakor","Somnath","Dwarka"],
+    "Jammu & Kashmir": ["Katra"],
+    "Karnataka": ["Bengaluru"],
+    "Kerala": ["Kannur"],
+    "Madhya Pradesh": ["Ujjain"],
+    "Maharashtra": ["Mumbai","Pandharpur","Shirdi"],
+    "Odisha": ["Puri"],
+    "Punjab": ["Amritsar"],
+    "Rajasthan": ["Mount Abu"],
+    "Tamil Nadu": ["Chennai"],
+    "Telangana": ["Hyderabad"],
+    "Uttar Pradesh": ["Varanasi","Ayodhya"],
+    "Uttarakhand": ["Haridwar","Rishikesh"]
+  };
+  // q = in-page search for live streams; must = the result has to mention the place (so no foreign cameras slip in)
+  var INDIA_SRC = {
+    "New Delhi": {q:"new delhi live camera", must:/delhi|paharganj|connaught|india gate/i},
+    "Muzaffarpur": {q:"muzaffarpur garib nath mandir live", must:/muzaffarpur|garib ?nath/i},
+    "Ahmedabad": {q:"ahmedabad jagannath temple live darshan", must:/ahmedabad|jagannath/i},
+    "Bhuj": {q:"bhuj swaminarayan mandir live darshan", must:/bhuj|swaminarayan/i},
+    "Dakor": {q:"dakor ranchhodraiji live darshan", must:/dakor|ranchod/i},
+    "Kannur": {q:"kannur live camera", must:/kannur|cannanore/i},
+    "Pandharpur": {q:"pandharpur vitthal rukmini live darshan", must:/pandharpur|vitthal|vithoba/i},
+    "Mount Abu": {q:"mount abu brahma kumaris live", must:/abu|brahma kumari/i},
+    "Tirupati": {q:"tirumala live darshan", must:/tirumala|tirupati|svbc|venkateswara|balaji|ttd/i},
+    "Paharganj": {q:"delhi paharganj live camera 24/7", must:/delhi|paharganj|connaught|india gate/i},
+    "Connaught Place": {q:"connaught place delhi live camera", must:/delhi|paharganj|connaught|india gate/i},
+    "Somnath": {q:"somnath temple live darshan", must:/somnath/i},
+    "Dwarka": {q:"dwarkadhish temple live darshan", must:/dwarka/i},
+    "Katra": {q:"vaishno devi live aarti", must:/vaishno|katra/i},
+    "Bengaluru": {q:"bengaluru live camera traffic", must:/bengaluru|bangalore/i},
+    "Ujjain": {q:"mahakaleshwar ujjain live darshan", must:/mahakal|ujjain/i},
+    "Mumbai": {q:"mumbai live camera 24/7", must:/mumbai|bombay|marine drive|gateway|bandra|worli|juhu/i},
+    "Shirdi": {q:"shirdi sai baba live darshan", must:/shirdi|sai ?baba/i},
+    "Puri": {q:"puri jagannath temple live", must:/puri|jagannath/i},
+    "Amritsar": {q:"golden temple harmandir sahib live", must:/golden temple|harmandir|darbar sahib|amritsar|sgpc/i},
+    "Chennai": {q:"chennai live camera marina beach traffic", must:/chennai|marina|madras/i},
+    "Hyderabad": {q:"hyderabad live camera traffic charminar", must:/hyderabad|charminar|secunderabad|hussain/i},
+    "Varanasi": {q:"varanasi ganga aarti live kashi", must:/varanasi|kashi|banaras|ganga|ghat/i},
+    "Ayodhya": {q:"ayodhya ram mandir live aarti", must:/ayodhya|ram mandir|ram lalla|janmabhoomi/i},
+    "Haridwar": {q:"haridwar har ki pauri ganga aarti live", must:/haridwar|har ki pauri|ganga/i},
+    "Rishikesh": {q:"rishikesh ganga aarti live triveni ghat", must:/rishikesh|triveni|parmarth|laxman/i}
+  };
+  // Indian webcams listed on worldcam.eu (live-view page = same number as the webcam page)
+  function wc(name, slug, ch){
+    var id = slug.split('-')[0];
+    return {name: name, url: 'https://worldcam.eu/liveview/' + id, page: 'https://worldcam.eu/webcams/asia/india/' + slug, ch: ch || 'WorldCam India webcam', type: 'frame'};
+  }
+  var NEWDELHI = wc('New Delhi - Panoramic city view (Parikrama revolving restaurant)', '31023-new-delhi-panoramic-view', 'WorldCam / AQI.in');
+  var ISKCONDELHI = wc('Delhi - Sri Sri Radha Parthasarathi Mandir (ISKCON Delhi)', '5447-delhi-sri-sri-radha-parthasarathi-mandir', 'WorldCam / ISKCON Delhi');
+  var WCAMS = {
+    "Paharganj": [NEWDELHI, ISKCONDELHI],
+    "Connaught Place": [NEWDELHI, ISKCONDELHI],
+    "New Delhi": [NEWDELHI, ISKCONDELHI],
+    "Mumbai": [wc('Mumbai - Shree Mumbadevi Mandir', '5209-mumbai-shree-mumbadevi-mandir-charities', 'WorldCam India webcam')],
+    "Shirdi": [wc('Shirdi - Samadhi Mandir', '2678-shirdi-samadhi-mandir', 'WorldCam India webcam')],
+    "Puri": [wc('Puri - Jagannath Temple', '40335-puri-jagannath-temple', 'WorldCam India webcam')],
+    "Haridwar": [wc('Haridwar - Shantikunj Gayatri Parivar', '18853-haridwar-shantikunj-gayatri-parivar', 'WorldCam India webcam')],
+    "Bengaluru": [
+      wc('Bengaluru - Banaswadi', '41313-bengaluru-banaswadi', 'WorldCam India webcam'),
+      wc('Bangalore - ISKCON Bangalore', '11739-bangalore-iskcon-bangalore', 'WorldCam India webcam'),
+      wc('Bangalore - Shivoham Shiva Temple', '36063-bangalore-shivoham-shiva-temple', 'WorldCam India webcam')],
+    "Chennai": [
+      wc('Chennai - Arignar Anna Zoological Park', '19604-chennai-arignar-anna-zoological-park', 'WorldCam India webcam'),
+      wc('Chennai - Indira Nagar (T.T.K Hospital area)', '34845-chennai-indira-nagar-ttk-hospital', 'WorldCam India webcam'),
+      wc('Chennai - Weather station camera', '18544-chennai-weather-station', 'WorldCam India webcam')],
+    "Ahmedabad": [wc('Ahmedabad - Shree Jagannathji Mandir', '27389-ahmedabad-shree-jagannathji-mandir', 'WorldCam India webcam')],
+    "Bhuj": [wc('Bhuj - Shree Swaminarayan Mandir', '27390-bhuj-shree-swaminarayan-mandir', 'WorldCam India webcam')],
+    "Dakor": [wc('Dakor - Ranchodrayji Temple', '40981-dakor-ranchodrayji-temple', 'WorldCam India webcam')],
+    "Pandharpur": [wc('Pandharpur - Shri Vitthal Rukmini Mandir', '27391-pandharpur-shri-vitthal-rukmini-mandir', 'WorldCam India webcam')],
+    "Mount Abu": [wc('Mount Abu - Tower of Peace', '30331-mount-abu-tower-of-peace', 'WorldCam India webcam')],
+    "Muzaffarpur": [wc('Muzaffarpur - Garib Nath Mandir', '30510-muzaffarpur-garib-nath-mandir', 'WorldCam India webcam')],
+    "Kannur": [
+      wc('Kerala - Kannur (house yard & street, live)', '21794-kerala-kannur', 'WorldCam India webcam'),
+      {name: 'Kerala - Kannur live video (YouTube)', vid: 'W_xwEtwgqP4', ch: 'YouTube live listed on WorldCam', type: 'ytlive'}]
+  };
+  Object.keys(WCAMS).forEach(function(k){
+    CITY_DIRECT_CAMS[k] = (CITY_DIRECT_CAMS[k] || []).concat(WCAMS[k]);
+  });
+
+  var INDIA_LINKS = [
+    {name:"WebcamTaxi - India", url:"https://www.webcamtaxi.com/en/india.html"},
+    {name:"WorldCam.eu - India", url:"https://worldcam.eu/webcams/asia/india"},
+    {name:"Outdooractive - Webcams in India", url:"https://www.outdooractive.com/en/webcams/india/webcams-in-india/272487181/"},
+    {name:"Camscape", url:"https://www.camscape.com"},
+    {name:"TrafficVision India", url:"https://trafficvision.live/blog/india-traffic-cameras"}
+  ];
+  var CITY_LINKS = {
+    "Chennai": [{name:"Chennai Traffic Police", url:"https://chennai.trafficpolice.gov.in"}],
+    "Bengaluru": [{name:"Bengaluru Traffic Police", url:"https://btp.gov.in"}],
+    "Hyderabad": [{name:"Hyderabad Traffic Police", url:"https://www.hyderabadpolice.gov.in"}]
   };
 
   var SPACE_TERMS = {
@@ -222,7 +296,10 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
     "The Sun": "",
     "ISS & NASA TV": "ISS live Earth view NASA"
   };
-  function isSpaceTerm(t){ return Object.keys(SPACE_TERMS).some(function(k){ return SPACE_TERMS[k] === t && t; }); }
+  function isSpaceTerm(t){
+    return Object.keys(SPACE_TERMS).some(function(k){ return SPACE_TERMS[k] === t && t; }) ||
+           Object.keys(INDIA_SRC).some(function(k){ return INDIA_SRC[k].q === t; });
+  }
 
   var WORLD = {
     "🚀 Space (Earth, Sun, ISS)": ["Earth from Space","The Sun","ISS & NASA TV"],
@@ -288,7 +365,9 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
     {label:"🇺🇸 Los Angeles Video CCTV", city:"Los Angeles", term:"Los Angeles"},
     {label:"🇯🇵 Tokyo Live Cams", city:"Tokyo", term:"Tokyo live camera street"},
     {label:"🇵🇭 Davao City Live", city:"Davao City", term:"Davao City live camera"},
-    {label:"🇮🇳 Varanasi Live", city:"Varanasi", term:"Varanasi Ganga live cam"}
+    {label:"🇮🇳 Varanasi Live", city:"Varanasi", term:""},
+    {label:"🇮🇳 Tirupati Live", city:"Tirupati", term:""},
+    {label:"🇮🇳 Mumbai Live", city:"Mumbai", term:""}
   ];
   var chipsWrap = document.getElementById('quickChips');
   chips.forEach(function(ch){
@@ -380,25 +459,31 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
     });
   }
 
+  var loadToken = 0;
   async function loadLocation(cityName, searchTerm) {
+    var myLoad = ++loadToken;
+    var src = INDIA_SRC.hasOwnProperty(cityName) ? INDIA_SRC[cityName] : null;
+    if (src) searchTerm = src.q;
     document.getElementById('camBox').style.display = 'block';
     document.getElementById('camTitle').textContent = 'Live CCTV Cameras — ' + cityName;
-    camsEl.innerHTML = '<div class="note">Loading verified live cameras for ' + cityName + '...</div>';
+    camsEl.innerHTML = '<div class="note">Searching live cameras for ' + cityName + '...</div>';
 
     var list = [];
-    // 1. Add direct municipal/DOT cameras for this city if available
+    // 1. Direct municipal/DOT cameras for this city if available
     if (CITY_DIRECT_CAMS[cityName]) {
       list = CITY_DIRECT_CAMS[cityName].slice();
     }
 
-    // 2. Search additional live feeds if not Featured
+    // 2. Search additional live feeds (not for Featured)
     if (cityName !== 'Featured' && searchTerm) {
       var searched = await searchPublicCams(searchTerm);
+      if (src) searched = searched.filter(function(c){ return src.must.test(c.name + ' ' + c.ch); });
       list = list.concat(searched);
     }
+    if (myLoad !== loadToken) return; // user picked another place meanwhile
 
-    // 3. Always append verified direct feeds if search returned nothing
-    if (list.length === 0) {
+    // 3. Fallback to the sample feeds only for non-Indian places (never show foreign cameras for an Indian city)
+    if (list.length === 0 && !src) {
       list = CITY_DIRECT_CAMS["Featured"].slice();
     }
 
@@ -407,7 +492,7 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
     }
     currentList = list;
     camsEl.innerHTML = '';
-    document.getElementById('camCount').textContent = list.length + ' working feeds';
+    document.getElementById('camCount').textContent = list.length + ' live feeds';
 
     list.forEach(function(cam, idx){
       var row = document.createElement('div');
@@ -415,15 +500,51 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
       row.id = 'cam-' + idx;
       var badge = cam.type === 'hls'
         ? '<span class="badge hls">DIRECT VIDEO</span>'
-        : '<span class="badge">LIVE CCTV</span>';
+        : (cam.type === 'frame' ? '<span class="badge hls">WORLDCAM LIVE VIEW</span>' : '<span class="badge">LIVE CCTV</span>');
       row.innerHTML = '<div><b></b><small>' + badge + ' ' + (cam.ch || 'Public Stream') + '</small></div>';
       row.querySelector('b').textContent = cam.name;
       var btn = document.createElement('button');
       btn.textContent = 'Watch';
       btn.onclick = function(){ playIdx(idx); };
-      row.appendChild(btn);
+      var act = document.createElement('div');
+      act.style.cssText = 'display:flex;gap:8px;align-items:center;flex-shrink:0';
+      if (cam.page) {
+        var site = document.createElement('a');
+        site.href = cam.page; site.target = '_blank'; site.rel = 'noopener'; site.textContent = 'Site \u2197';
+        site.style.cssText = 'color:var(--ac);font-size:12px;font-weight:700;text-decoration:none';
+        act.appendChild(site);
+      }
+      act.appendChild(btn);
+      row.appendChild(act);
       camsEl.appendChild(row);
     });
+
+    if (src && list.length === 0) {
+      stopAll();
+      document.getElementById('plWrap').style.display = 'none';
+      var n = document.createElement('div');
+      n.className = 'note';
+      n.textContent = 'No live stream for ' + cityName + ' was found right now. The free search servers can be busy: try again in a minute. You can also use the source sites below.';
+      camsEl.appendChild(n);
+    }
+
+    // Source websites (open in a new tab; these sites cannot be shown inside this page)
+    if (src) {
+      var links = (CITY_LINKS[cityName] || []).concat(INDIA_LINKS);
+      var h = document.createElement('div');
+      h.className = 'note';
+      h.style.marginTop = '10px';
+      h.textContent = 'More Indian camera sources (open in a new tab):';
+      camsEl.appendChild(h);
+      links.forEach(function(l){
+        var r = document.createElement('div');
+        r.className = 'src';
+        r.style.cssText = 'display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 10px;border:1px dashed var(--bd);border-radius:8px';
+        var t = document.createElement('span'); t.style.fontSize = '13px'; t.textContent = l.name;
+        var a = document.createElement('a'); a.href = l.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Open'; a.style.cssText = 'color:var(--ac);font-weight:700;text-decoration:none';
+        r.appendChild(t); r.appendChild(a); camsEl.appendChild(r);
+      });
+    }
 
     if (currentList.length > 0) playIdx(0);
   }
@@ -500,6 +621,9 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
     document.getElementById('plWrap').style.display = 'block';
     document.getElementById('nowPlaying').textContent = '🔴 ' + cam.name;
     pl.innerHTML = '<div class="buf" id="buf"><div class="spin"></div><div id="bufTxt">Connecting to live camera...</div></div>';
+
+    // Case 0: WorldCam live-view page shown inside the page
+    if (cam.type === 'frame') { playFrame(cam); return; }
 
     // Case 1: Direct HLS .m3u8 Video Stream
     if (cam.type === 'hls' || (cam.url && /\.m3u8(\?|$)/i.test(cam.url))) {
@@ -580,6 +704,20 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
     f.onload = clearBuf;
     f.src = 'https://www.youtube-nocookie.com/embed/' + vid + '?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1';
     pl.appendChild(f);
+  }
+
+  function playFrame(cam) {
+    var tok = playToken;
+    document.getElementById('plStatus').textContent = 'WorldCam live view. If it stays blank, that site blocks embedding: tap "Site" next to the camera name to open it.';
+    var f = document.createElement('iframe');
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    f.allow = 'autoplay; fullscreen; encrypted-media';
+    f.allowFullscreen = true;
+    f.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff';
+    f.onload = function(){ if (tok === playToken) { clearBuf(); skipCount = 0; } };
+    f.src = cam.url;
+    pl.appendChild(f);
+    startWatch = setTimeout(function(){ if (tok === playToken) clearBuf(); }, 10000);
   }
 
   function playNativeHlsVideo(hlsUrl, title, onFail) {
