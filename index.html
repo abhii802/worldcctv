@@ -43,9 +43,35 @@ button.alt.active{border-color:var(--ac);background:var(--ac);color:#fff}
 .spin{width:34px;height:34px;border:4px solid #fff4;border-top-color:#fff;border-radius:50%;animation:s 1s linear infinite}
 @keyframes s{to{transform:rotate(360deg)}}
 .note{font-size:12px;color:var(--mu);margin-top:8px}
+/* --- anti-copy (deterrent) --- */
+html,body{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
+img,video{-webkit-user-drag:none}
 </style>
 </head>
 <body>
+<script>
+(function(){
+  function isField(t){ return t && (t.tagName==='INPUT' || t.tagName==='TEXTAREA'); }
+
+  // Disable right-click
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+  // Disable selecting, copying, cutting, dragging (except inside input boxes)
+  ['selectstart','copy','cut','dragstart'].forEach(function(ev){
+    document.addEventListener(ev, function(e){ if(!isField(e.target)) e.preventDefault(); });
+  });
+
+  // Disable common shortcuts: F12, Ctrl/Cmd+U, S, P, Shift+I/J/C/K
+  document.addEventListener('keydown', function(e){
+    var k=(e.key||'').toLowerCase(), c=e.ctrlKey||e.metaKey;
+    if(e.keyCode===123 || k==='f12'){ e.preventDefault(); return; }
+    if(c && (k==='u' || k==='s' || k==='p')){ e.preventDefault(); return; }
+    if(c && e.shiftKey && (k==='i' || k==='j' || k==='c' || k==='k')){ e.preventDefault(); return; }
+    if(e.metaKey && e.altKey && (k==='i' || k==='u' || k==='j' || k==='c')){ e.preventDefault(); return; }
+  });
+})();
+</script>
 
 <header>
   <div>
